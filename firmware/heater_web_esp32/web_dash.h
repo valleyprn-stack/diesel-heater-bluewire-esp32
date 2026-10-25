@@ -1,0 +1,129 @@
+// Generated from web_src/dash.html by build_pages.py - edit the source, not this file.
+#pragma once
+#include <pgmspace.h>
+const char PAGE_DASH[] PROGMEM = R"PG(<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shed Heater</title>
+<style>
+:root{--bg:#070809;--panel:#111317;--line:#262a31;--acc:#7fe3ff;--accFg:#00141c;--logBg:#050607;--logFg:#a9b4c0;--gLine:#7fe3ff;--gRun:#ffb000;--gCool:#2f80ed;--grid:#1d2026}
+.ln{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.zone{fill:none;stroke-width:9}
+.tmin{fill:none;stroke:#6b7480;stroke-width:1.5}
+.tmaj{fill:none;stroke:#e6ebf0;stroke-width:3;stroke-linecap:round}
+.tl{font:700 14px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:#d6dde5;text-anchor:middle;dominant-baseline:middle}
+.dig{font:700 28px ui-monospace,"SF Mono",Menlo,Consolas,monospace;fill:#7fe3ff;text-anchor:middle}
+.cap{font:700 10px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.2em;fill:#8b96a3;text-anchor:middle}
+.u{font:700 12px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;fill:#8b96a3;text-anchor:middle}
+.clus{background:#0b0c0f;border:1px solid #1d2026;border-radius:20px;padding:10px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:10px}
+#gauge{width:100%;max-width:336px;height:auto;display:block}
+#needle{transform-origin:170px 160px;transition:transform .7s cubic-bezier(.2,.8,.2,1)}
+.lamps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:100%}
+.lamp{display:flex;flex-direction:column;align-items:center;gap:4px}
+.lamp div{width:52px;max-width:100%;height:40px;border-radius:8px;background:#0f1114;border:1px solid #1d2026;display:flex;align-items:center;justify-content:center}
+.lamp span{font-size:9px;font-weight:700;letter-spacing:.12em;color:#8b96a3}
+.lcdtxt{width:100%;box-sizing:border-box;background:#061016;border:1px solid #12303d;border-radius:8px;padding:8px 12px;font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;font-size:14px;font-weight:700;letter-spacing:.08em;color:#7fe3ff;text-align:center;min-height:19px}
+.lvcard{background:#0b0c0f;border:1px solid #1d2026;border-radius:16px;padding:10px 12px;display:flex;flex-direction:column;gap:8px}
+.lvh{display:flex;justify-content:space-between;align-items:baseline}
+.lvh span{font-size:11px;font-weight:700;letter-spacing:.16em;color:#8b96a3}
+.lvh b{font-size:22px;font-weight:800;color:#e6ebf0;font-variant-numeric:tabular-nums}
+.lvr{display:flex;align-items:center;gap:8px}
+.sq{width:44px;height:44px;border-radius:10px;border:1px solid #262a31;background:#111317;color:#cfd6de;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none}
+.leds{flex:1;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:5px}
+.leds button{height:30px;border-radius:5px;border:1px solid #1d2026;padding:0;cursor:pointer;background:#16191e}
+.ss{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ss button{height:54px;border-radius:12px;font-size:17px;font-weight:800;letter-spacing:.1em;cursor:pointer;border:1px solid}
+.ss button:disabled{cursor:default}
+</style></head><body>
+<div class="wrap">
+<div id="hdr"></div>
+<div id="alert"></div>
+<div class="clus">
+<svg id="gauge" viewBox="0 0 340 314" role="img" aria-label="Chamber temperature gauge">
+<circle cx="170" cy="160" r="150" style="fill:#121418;stroke:#2a2f37;stroke-width:4"/>
+<circle cx="170" cy="160" r="140" style="fill:#050607"/>
+<g id="dial"></g>
+<text x="170" y="118" class="u" id="gU">&deg;C</text>
+<text x="170" y="214" class="dig" id="gR">---</text>
+<text x="170" y="238" class="cap">CHAMBER</text>
+<g id="needle">
+<polygon points="166.5,160 173.5,160 170,46" style="fill:#f2f4f7"/>
+<polygon points="168.6,70 171.4,70 170,46" style="fill:#ff3b30"/>
+</g>
+<circle cx="170" cy="160" r="12" style="fill:#1f2329;stroke:#3a3f47;stroke-width:2"/>
+<circle cx="170" cy="160" r="4" style="fill:#0b0d10"/>
+</svg>
+<div class="lamps" id="lamps"></div>
+<div class="lcdtxt" id="lcd">---</div>
+</div>
+<div class="lvcard">
+<div class="lvh"><span>LEVEL</span><b id="lvT">-</b></div>
+<div class="lvr">
+<button class="sq" aria-label="Level down" onclick="cmd('down')"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="ln" d="M6 9l6 6 6-6"/></svg></button>
+<div class="leds" id="leds">
+<button aria-label="Level 1" onclick="cmd('level',1)"></button><button aria-label="Level 2" onclick="cmd('level',2)"></button>
+<button aria-label="Level 3" onclick="cmd('level',3)"></button><button aria-label="Level 4" onclick="cmd('level',4)"></button>
+<button aria-label="Level 5" onclick="cmd('level',5)"></button><button aria-label="Level 6" onclick="cmd('level',6)"></button>
+</div>
+<button class="sq" aria-label="Level up" onclick="cmd('up')"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="ln" d="M6 15l6-6 6 6"/></svg></button>
+</div>
+</div>
+<div class="ss">
+<button id="bStart" onclick="cmd('on')">START</button>
+<button id="bStop" onclick="cmd('off')">STOP</button>
+</div>
+<div id="common"></div>
+</div>
+<script>
+var THEME='dash',gUnitBuilt='';
+var CX=170,CY=160;
+var LAMPS=[['GLOW','M2 12h3c0-4 3-4 3 0s3 4 3 0 3-4 3 0 3 4 3 0h3M6 7h12M6 17h12','#ffb000'],
+['FAN','M12 10c0-4 1-6 4-6 2 0 2 3 0 5M14 12c4 0 6 1 6 4 0 2-3 2-5 0M12 14c0 4-1 6-4 6-2 0-2-3 0-5M10 12c-4 0-6-1-6-4 0-2 3-2 5 0','#3ddc84'],
+['PUMP','M12 3C12 3 5 11 5 16a7 7 0 0 0 14 0c0-5-7-13-7-13z','#ffb000'],
+['FAULT','M12 3L22 20H2ZM12 9v5M12 17.2v.1','#ff3b30'],
+['LINK','M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01','#4da3ff']];
+var LEDC=['#3ddc84','#8be04e','#c9e43a','#ffd400','#ff9f1a','#ff4d2e'];
+function dmax(){return H.unit=='F'?500:250}
+function ang(v){var f=v/dmax();f=Math.max(0,Math.min(1,f));return -135+270*f}
+function pt(deg,r){var a=deg*Math.PI/180;return [CX+r*Math.sin(a),CY-r*Math.cos(a)]}
+function n1(x){return x.toFixed(1)}
+function arc(v1,v2,r){var a1=ang(v1),a2=ang(v2),p1=pt(a1,r),p2=pt(a2,r);
+return 'M'+n1(p1[0])+' '+n1(p1[1])+'A'+r+' '+r+' 0 '+(a2-a1>180?1:0)+' 1 '+n1(p2[0])+' '+n1(p2[1])}
+function buildDial(){
+var F=H.unit=='F',mx=dmax(),cv=function(c){return F?c*9/5+32:c};
+var zb=[0,cv(80),cv(120),cv(200),mx],zc=['#2f80ed','#5b6470','#2fbf71','#ffb000'],o='';
+for(var z=0;z<4;z++)o+='<path class="zone" d="'+arc(zb[z],zb[z+1],130)+'" style="stroke:'+zc[z]+'"/>';
+var minor=F?20:10,major=F?100:50,dMin='',dMaj='';
+for(var v=0;v<=mx+0.001;v+=minor){var mj=Math.abs(v%major)<0.001,a=pt(ang(v),122),b=pt(ang(v),mj?106:114);
+var s='M'+n1(a[0])+' '+n1(a[1])+'L'+n1(b[0])+' '+n1(b[1]);if(mj)dMaj+=s;else dMin+=s}
+o+='<path class="tmin" d="'+dMin+'"/><path class="tmaj" d="'+dMaj+'"/>';
+for(var k=0;k<6;k++){var lv=k*major,lp=pt(ang(lv),90);o+='<text class="tl" x="'+n1(lp[0])+'" y="'+n1(lp[1])+'">'+lv+'</text>'}
+$('dial').innerHTML=o;gUnitBuilt=H.unit;
+}
+var lampsBuilt=false;
+function lamps(){lampsBuilt=true;var o='';LAMPS.forEach(function(l){o+='<div class="lamp"><div><svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path class="ln" id="lp'+l[0]+'" d="'+l[1]+'"/></svg></div><span>'+l[0]+'</span></div>'});$('lamps').innerHTML=o}
+function lamp(n,on,col){var p=$('lp'+n);p.style.stroke=on?col:'#262a31';p.parentNode.style.filter=on?'drop-shadow(0 0 5px '+col+')':'none'}
+function draw(j,d){
+if(!lampsBuilt)lamps();
+if(gUnitBuilt!=H.unit)buildDial();
+var u=H.unit=='F'?'°F':'°C',has=d.c!==null;
+$('gU').textContent=u;
+$('gR').textContent=has?fmtT(d.c,d.approx)+u:'---';
+$('needle').style.transform='rotate('+n1(has?ang(T(d.c)):ang(0))+'deg)';
+$('gauge').setAttribute('aria-label','Chamber temperature gauge, '+(has?fmtT(d.c,d.approx)+u:'no reading'));
+lamp('GLOW',d.glow,'#ffb000');lamp('FAN',d.fan,'#3ddc84');lamp('PUMP',d.pump,'#ffb000');lamp('FAULT',d.fault,'#ff3b30');lamp('LINK',!j.stale,'#4da3ff');
+var t=d.dead?d.dead+' · '+d.desc.toUpperCase():d.off?'OFF · '+(d.volts?d.volts+' V ':'')+'STANDBY':
+d.run&&!d.starting?'RUN · LV '+d.level+' · '+(j.mode=='PB'?'PIGGYBACK':'STANDALONE'):d.fault?'FAULT'+(d.ecodeStr?' · '+d.ecodeStr:'')+(d.canClear?' · START CLEARS':''):
+d.label+' · '+d.desc.toUpperCase();
+$('lcd').textContent=t;$('lcd').style.color=d.fault||d.dead?'#ff8a80':'#7fe3ff';
+$('lvT').textContent=d.run?String(d.level):'-';
+var ks=$('leds').children;
+for(var i=0;i<ks.length;i++){var lit=d.run&&i<d.level;ks[i].style.background=lit?LEDC[i]:'#16191e';ks[i].style.boxShadow=lit?'0 0 8px '+LEDC[i]:'none'}
+var sOn=d.off||d.canClear,xOn=d.run,bs=$('bStart'),bx=$('bStop');
+bs.disabled=!sOn;bs.textContent=d.canClear?'CLEAR':'START';
+bs.style.background=sOn?(d.canClear?'#3a2a06':'#123a24'):'#0d1310';bs.style.borderColor=sOn?(d.canClear?'#ffb000':'#2fbf71'):'#1c2a22';bs.style.color=sOn?(d.canClear?'#ffe0a0':'#9ff2c4'):'#5f8a71';
+bx.disabled=!xOn;bx.style.background=xOn?'#3a1210':'#130d0d';bx.style.borderColor=xOn?'#ff3b30':'#2a1a1a';bx.style.color=xOn?'#ffb3ad':'#8a6460';
+}
+</script>
+<script src="/core.js?v=14"></script>
+</body></html>
+)PG";

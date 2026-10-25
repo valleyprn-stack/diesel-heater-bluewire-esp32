@@ -1,0 +1,177 @@
+// Generated from web_src/burner.html by build_pages.py - edit the source, not this file.
+#pragma once
+#include <pgmspace.h>
+const char PAGE_BURNER[] PROGMEM = R"PG(<!doctype html><html><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Shed Heater</title>
+<style>
+:root{--bg:#0d1117;--panel:#161c24;--line:#2a323d;--acc:#ff8c32;--accFg:#1a0b00;--gLine:#ffb347;--gRun:#ff8c32;--gCool:#4aa8e8}
+.trow{display:flex;justify-content:space-between;align-items:flex-end;gap:8px}
+.big{font-size:58px;font-weight:800;line-height:1;color:#f4f6f8;font-variant-numeric:tabular-nums}
+.unit{font-size:24px;font-weight:700;color:#ffb347;margin-left:4px}
+.lbl{font-size:13px;color:#9aa3ad;margin-left:8px}
+.chip{padding:6px 12px;border-radius:999px;font-size:13px;font-weight:800;letter-spacing:.08em;margin-bottom:6px;white-space:nowrap}
+.desc{font-size:13px;color:#9aa3ad;margin-top:-6px;text-align:right}
+.bar{height:8px;border-radius:4px;background:#1a2029;overflow:hidden}
+.bar div{height:8px;border-radius:4px;width:0;transition:width .4s}
+svg.cut{width:100%;height:auto;display:block}
+.chips{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.ci{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border-radius:10px;border:1px solid #222a35;background:#10151c}
+.ci span{font-size:11px;font-weight:700;color:#8b96a3}
+.ci path{stroke:#3a4452}
+.ci.on{border-color:var(--c);background:#141b24}
+.ci.on span{color:#e8edf2}
+.ci.on path{stroke:var(--c)}
+.main{height:56px;border-radius:14px;border:0;font-size:19px;font-weight:800;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:10px;cursor:pointer}
+.main:disabled{cursor:default}
+.lvl{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.lvl button{height:60px;border-radius:10px;border:1px solid #2a323d;background:#141a22;color:#c5cdd6;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;padding:6px 0;cursor:pointer}
+.lvl button span{font-size:13px;font-weight:800}
+.lvl button path{fill:#5b6470}
+.lvl button.sel{border-color:#ff8c32;background:#3d1c06;color:#ffd2a8}
+.lvl button.sel path{fill:#ff8c32}
+.ln{fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.fuel{fill:none;stroke:#7a6420;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.pipe{fill:none;stroke:#4b5563;stroke-width:9;stroke-linecap:round;stroke-linejoin:round}
+.plabel{font:700 9px system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.12em;fill:#9aa3ad;text-anchor:middle}
+.fin{fill:var(--heat,#2a313c);transition:fill 1s}
+#wall{stroke:var(--heat,#2a313c);transition:stroke 1s}
+.hot{stroke:var(--hot,#4b5563)}
+.blade{fill:#3a4452}
+.fan-on .blade{fill:#8fa3b8}
+#fan{transform-box:fill-box;transform-origin:center}
+.fan-on #fan{animation:spin var(--fd,1s) linear infinite}
+.air{opacity:.15}
+.fan-on .air{opacity:1}
+.fan-on .air path{animation:drift 1.1s linear infinite}
+#flame{opacity:0;transform-origin:130px 120px;transition:transform .6s,opacity .4s}
+.burn #flame{opacity:1}
+.flk,.flk2{transform-origin:130px 120px}
+.burn .flk{animation:flk .22s ease-in-out infinite alternate}
+.burn .flk2{animation:flk2 .17s ease-in-out infinite alternate}
+#halo{opacity:0}
+.glow-on #halo{animation:pulse 1.1s ease-in-out infinite}
+#tip{fill:#3a3f47}
+.glow-on #tip{fill:#ffe2b0}
+#drops{opacity:0}
+.pump-on #drops{opacity:1}
+.pump-on .drop{animation:drip .8s linear infinite}
+#pled{fill:#3a3f47}
+.pump-on #pled{fill:#ffcc33;animation:blink .7s steps(1) infinite}
+#shim{opacity:0}
+.shim #shim{opacity:1}
+.shim #shim path{animation:rise 1.4s ease-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes flk{from{transform:scale(1,1)}to{transform:scale(1.05,.86)}}
+@keyframes flk2{from{transform:scale(.94,1.06)}to{transform:scale(1.04,.92)}}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:.7}}
+@keyframes blink{50%{opacity:.2}}
+@keyframes drift{from{transform:translateX(-5px);opacity:0}30%{opacity:1}to{transform:translateX(6px);opacity:0}}
+@keyframes drip{from{transform:translateX(-8px);opacity:0}25%{opacity:1}to{transform:translateX(10px);opacity:0}}
+@keyframes rise{from{transform:translateY(4px);opacity:0}40%{opacity:.8}to{transform:translateY(-10px);opacity:0}}
+</style></head><body>
+<div class="wrap">
+<div id="hdr"></div>
+<div id="alert"></div>
+<div class="trow">
+<div><span class="big" id="temp">--</span><span class="unit" id="unit">&deg;C</span><span class="lbl">chamber</span></div>
+<span class="chip" id="chip" style="background:#1c232d;color:#cdd5df">...</span>
+</div>
+<div class="desc" id="desc"></div>
+<div class="bar"><div id="barf"></div></div>
+<svg class="cut" id="cut" viewBox="0 0 358 240" role="img" aria-label="Heater cutaway">
+<rect class="fin" x="120" y="44" width="7" height="28" rx="2"/><rect class="fin" x="135" y="44" width="7" height="28" rx="2"/>
+<rect class="fin" x="172" y="44" width="7" height="28" rx="2"/><rect class="fin" x="187" y="44" width="7" height="28" rx="2"/>
+<rect class="fin" x="202" y="44" width="7" height="28" rx="2"/><rect class="fin" x="217" y="44" width="7" height="28" rx="2"/>
+<rect class="fin" x="232" y="44" width="7" height="28" rx="2"/><rect class="fin" x="247" y="44" width="7" height="28" rx="2"/>
+<rect class="fin" x="262" y="44" width="7" height="28" rx="2"/><rect class="fin" x="277" y="44" width="7" height="28" rx="2"/>
+<rect x="14" y="70" width="320" height="100" rx="50" fill="#121820" stroke="#3a4452" stroke-width="2"/>
+<rect x="104" y="82" width="190" height="76" rx="38" fill="#0e1319" stroke="#2a323d" stroke-width="2"/>
+<rect id="wall" x="116" y="92" width="166" height="56" rx="28" fill="#07090c" stroke-width="3"/>
+<rect x="118" y="112" width="12" height="16" rx="3" fill="#4b5563"/>
+<g id="flame">
+<g class="flk"><path d="M130 120C152 99 200 101 262 120C200 139 152 141 130 120Z" fill="#ff6a13"/><path d="M131 120C150 106 186 108 230 120C186 132 150 134 131 120Z" fill="#ffa531"/></g>
+<g class="flk2"><path d="M132 120C146 112 166 114 190 120C166 126 146 128 132 120Z" fill="#fff1b8"/></g>
+</g>
+<circle id="halo" cx="155" cy="99" r="15" fill="#ff7a1a"/>
+<rect x="146" y="54" width="18" height="10" rx="2" fill="#7a8594"/>
+<rect x="151" y="62" width="8" height="33" fill="#5d6673"/>
+<circle id="tip" cx="155" cy="99" r="5"/>
+<text x="155" y="36" class="plabel">GLOW PLUG</text>
+<circle cx="60" cy="120" r="36" fill="#0b0f14" stroke="#3a4452" stroke-width="2"/>
+<g id="fan">
+<circle cx="60" cy="120" r="31" fill="none"/>
+<path class="blade" d="M60 120C55 108 58 94 66 89C69 99 67 111 60 120Z"/>
+<path class="blade" d="M60 120C55 108 58 94 66 89C69 99 67 111 60 120Z" transform="rotate(90 60 120)"/>
+<path class="blade" d="M60 120C55 108 58 94 66 89C69 99 67 111 60 120Z" transform="rotate(180 60 120)"/>
+<path class="blade" d="M60 120C55 108 58 94 66 89C69 99 67 111 60 120Z" transform="rotate(270 60 120)"/>
+</g>
+<circle cx="60" cy="120" r="6" fill="#2a323d" stroke="#4b5563" stroke-width="1.5"/>
+<g class="air" style="color:#6cc4ff">
+<path class="ln" d="M1 104h10M7 100l4 4-4 4"/><path class="ln" style="animation-delay:.35s" d="M1 120h10M7 116l4 4-4 4"/><path class="ln" style="animation-delay:.7s" d="M1 136h10M7 132l4 4-4 4"/>
+</g>
+<g class="air">
+<path class="ln hot" d="M339 104h10M345 100l4 4-4 4"/><path class="ln hot" style="animation-delay:.35s" d="M339 120h10M345 116l4 4-4 4"/><path class="ln hot" style="animation-delay:.7s" d="M339 136h10M345 132l4 4-4 4"/>
+</g>
+<path class="fuel" d="M102 203H124V128"/>
+<g id="drops">
+<circle class="drop" cx="110" cy="203" r="3" fill="#e8c547"/><circle class="drop" cx="110" cy="203" r="3" fill="#e8c547" style="animation-delay:.27s"/><circle class="drop" cx="110" cy="203" r="3" fill="#e8c547" style="animation-delay:.53s"/>
+</g>
+<rect x="52" y="188" width="50" height="30" rx="7" fill="#161c24" stroke="#3a4452" stroke-width="2"/>
+<text x="71" y="207" class="plabel">PUMP</text>
+<circle id="pled" cx="93" cy="196" r="3.5"/>
+<path class="pipe" d="M296 170V206H340"/>
+<g id="shim" style="color:#9aa3ad">
+<path class="ln" style="stroke-width:1.5" d="M348 200q3-5 0-10q-3-5 0-10"/><path class="ln" style="stroke-width:1.5;animation-delay:.5s" d="M354 202q3-5 0-10q-3-5 0-10"/>
+</g>
+</svg>
+<div class="chips">
+<div class="ci" id="ciFan" style="--c:#6cc4ff"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="ln" d="M12 10c0-4 1-6 4-6 2 0 2 3 0 5M14 12c4 0 6 1 6 4 0 2-3 2-5 0M12 14c0 4-1 6-4 6-2 0-2-3 0-5M10 12c-4 0-6-1-6-4 0-2 3-2 5 0"/></svg><span>Fan</span></div>
+<div class="ci" id="ciGlow" style="--c:#ff9a3c"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="ln" d="M2 12h3c0-4 3-4 3 0s3 4 3 0 3-4 3 0 3 4 3 0h5"/></svg><span>Glow plug</span></div>
+<div class="ci" id="ciPump" style="--c:#e8c547"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="ln" d="M12 3C12 3 5 11 5 16a7 7 0 0 0 14 0c0-5-7-13-7-13z"/></svg><span>Fuel pump</span></div>
+<div class="ci" id="ciLink" style="--c:#3ddc84"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="ln" d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0M12 19.5h.01"/></svg><span>Link</span></div>
+</div>
+<button class="main" id="main" onclick="mainBtn()" disabled style="background:#1c232d;color:#8b96a3">
+<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path class="ln" d="M12 3v8M6.3 6.8a8 8 0 1 0 11.4 0"/></svg><span id="mainTxt">WAITING</span>
+</button>
+<div class="lvl" id="lvl">
+<button aria-label="Level 1" onclick="cmd('level',1)"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M12 22c-4 0-7-3-6-7 1-3 3-4 3-7 3 2 4 4 4 6 1-1 2-3 2-4 3 3 4 6 3 8-1 3-3 4-6 4z"/></svg><span>1</span></button>
+<button aria-label="Level 2" onclick="cmd('level',2)"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M12 22c-4 0-7-3-6-7 1-3 3-4 3-7 3 2 4 4 4 6 1-1 2-3 2-4 3 3 4 6 3 8-1 3-3 4-6 4z"/></svg><span>2</span></button>
+<button aria-label="Level 3" onclick="cmd('level',3)"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 22c-4 0-7-3-6-7 1-3 3-4 3-7 3 2 4 4 4 6 1-1 2-3 2-4 3 3 4 6 3 8-1 3-3 4-6 4z"/></svg><span>3</span></button>
+<button aria-label="Level 4" onclick="cmd('level',4)"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 22c-4 0-7-3-6-7 1-3 3-4 3-7 3 2 4 4 4 6 1-1 2-3 2-4 3 3 4 6 3 8-1 3-3 4-6 4z"/></svg><span>4</span></button>
+<button aria-label="Level 5" onclick="cmd('level',5)"><svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 22c-4 0-7-3-6-7 1-3 3-4 3-7 3 2 4 4 4 6 1-1 2-3 2-4 3 3 4 6 3 8-1 3-3 4-6 4z"/></svg><span>5</span></button>
+<button aria-label="Level 6" onclick="cmd('level',6)"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true"><path d="M12 22c-4 0-7-3-6-7 1-3 3-4 3-7 3 2 4 4 4 6 1-1 2-3 2-4 3 3 4 6 3 8-1 3-3 4-6 4z"/></svg><span>6</span></button>
+</div>
+<div id="common"></div>
+</div>
+<script>
+var THEME='burner';
+var HEAT=[[20,[42,49,60]],[90,[90,36,24]],[150,[168,58,20]],[200,[255,106,19]]];
+var BAR=[[20,[56,120,200]],[90,[230,160,40]],[200,[255,90,20]]];
+var HOT=[[25,[75,85,99]],[150,[255,154,60]]];
+function chip(on,id){$(id).className='ci'+(on?' on':'')}
+function draw(j,d){
+var c=d.c,cc=c===null?20:c;
+$('temp').textContent=fmtT(c,d.approx);
+$('unit').innerHTML='&deg;'+H.unit;
+var ch=d.dead?['#3d0b0e','#ff8a8a']:d.fault?['#3d0b0e','#ff8a8a']:d.starting?['#3b2a07','#ffcc66']:
+d.run?['#3d1c06','#ffb37a']:d.cool?['#0b2a3d','#8fd3ff']:['#1c232d','#cdd5df'];
+var e=$('chip');e.style.background=ch[0];e.style.color=ch[1];e.textContent=d.label;
+$('desc').textContent=d.desc;
+var b=$('barf');b.style.width=(c===null?0:Math.max(2,Math.min(100,(c-20)/210*100)))+'%';b.style.background=mix(BAR,cc);
+var s=$('cut'),lv=d.run&&d.level?d.level:3;
+s.setAttribute('class','cut'+(d.fan?' fan-on':'')+(d.glow?' glow-on':'')+(d.pump?' pump-on':'')+(d.burn?' burn':'')+(d.fan&&cc>60?' shim':''));
+s.style.setProperty('--heat',mix(HEAT,cc));s.style.setProperty('--hot',mix(HOT,cc));
+s.style.setProperty('--fd',(1.3-lv*0.16).toFixed(2)+'s');
+$('flame').style.transform=d.burn?'scale('+(0.5+lv*0.085).toFixed(2)+','+(0.65+lv*0.06).toFixed(2)+')':'scale(.3)';
+s.setAttribute('aria-label','Heater '+d.label+', '+d.desc);
+chip(d.fan,'ciFan');chip(d.glow,'ciGlow');chip(d.pump,'ciPump');chip(!j.stale,'ciLink');
+var m=!d.action?(d.cool?['#1c2a38','#8fd3ff']:d.fault||d.dead?['#3d0b0e','#ff8a8a']:['#1c232d','#8b96a3']):
+d.off?['#1f8a4c','#fff']:d.run?['#b3261e','#fff']:['#8a5a00','#fff'];
+var mb=$('main');mb.disabled=!d.action;mb.style.background=m[0];mb.style.color=m[1];$('mainTxt').textContent=d.actionText;
+var ks=$('lvl').children;for(var i=0;i<ks.length;i++)ks[i].className=d.run&&d.level==i+1?'sel':'';
+}
+</script>
+<script src="/core.js?v=14"></script>
+</body></html>
+)PG";

@@ -1,0 +1,8 @@
+build/
+*.bin
+*.elf
+*.o
+.DS_Store
+Thumbs.db
+tools/bus_sim/bus_sim
+tools/bus_sim/bus_sim.exe
